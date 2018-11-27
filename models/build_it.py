@@ -7,19 +7,19 @@ import odoo.addons.decimal_precision as dp
 from datetime import datetime
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 _STATES = [
-    ('draft', 'Draft'),
-    ('to_approve', 'To be approved'),
-    ('leader_approved', 'Leader Approved'),
-    ('manager_approved', 'Manager Approved'),
-    ('rejected', 'Rejected'),
-    ('done', 'Done')
+    ('draft', 'Brouillon'),
+    ('to_approve', 'A Valider'),
+    ('leader_approved', 'Leader Validation'),
+    ('manager_approved', 'Manager Validation'),
+    ('rejected', 'Refusé'),
+    ('done', 'Fait')
 ]
 
 
-class SprogroupPurchaseRequest(models.Model):
+class buildit(models.Model):
 
-    _name = 'sprogroup.purchase.request'
-    _description = 'Sprogroup Purchase Request'
+    _name = 'build.it'
+    _description = 'Build it Purchase Request'
     _inherit = ['mail.thread']
 
 
@@ -29,31 +29,31 @@ class SprogroupPurchaseRequest(models.Model):
 
     @api.model
     def _get_default_name(self):
-        return self.env['ir.sequence'].next_by_code('sprogroup.purchase.request')
+        return self.env['ir.sequence'].next_by_code('build.it')
 
-    name = fields.Char('Request Name', size=32, required=True,
+    name = fields.Char('Nom de la demande', size=32, required=True,
                        track_visibility='onchange')
 
     code = fields.Char('Code', size=32, required=True,
                        default=_get_default_name,
                        track_visibility='onchange')
-    date_start = fields.Date('Start date',
+    date_start = fields.Date('Date de début',
                              help="Date when the user initiated the request.",
                              default=fields.Date.context_today,
                              track_visibility='onchange')
-    end_start = fields.Date('End date',default=fields.Date.context_today,
+    end_start = fields.Date('Date de fin',default=fields.Date.context_today,
                              track_visibility='onchange')
     requested_by = fields.Many2one('res.users',
-                                   'Requested by',
+                                   'Demandé par',
                                    required=True,
                                    track_visibility='onchange',
                                    default=_get_default_requested_by)
-    assigned_to = fields.Many2one('res.users', 'Approver', required=True,
+    assigned_to = fields.Many2one('res.users', 'Responsable validation', required=True,
                                   track_visibility='onchange')
     description = fields.Text('Description')
 
-    line_ids = fields.One2many('sprogroup.purchase.request.line', 'request_id',
-                               'Products to Purchase',
+    line_ids = fields.One2many('build.it.line', 'request_id',
+                               'Produits à acheté',
                                readonly=False,
                                copy=True,
                                track_visibility='onchange')
@@ -64,7 +64,7 @@ class SprogroupPurchaseRequest(models.Model):
                              required=True,
                              copy=False,
                              default='draft')
-    project_id = fields.Many2one(string='Project',
+    project_id = fields.Many2one(string='Projet',
                                 required=True,
                                 comodel_name='project.project',)
 
@@ -107,7 +107,7 @@ class SprogroupPurchaseRequest(models.Model):
             self.can_leader_approved = True
         else:
             self.can_leader_approved = False
-    can_leader_approved = fields.Boolean(string='Can Leader approved',compute='_compute_can_leader_approved' )
+    can_leader_approved = fields.Boolean(string='Leader peut valider',compute='_compute_can_leader_approved' )
 
     @api.one
     @api.depends('state')
@@ -119,7 +119,7 @@ class SprogroupPurchaseRequest(models.Model):
         else:
             self.can_manager_approved = False
 
-    can_manager_approved = fields.Boolean(string='Can Manager approved',compute='_compute_can_manager_approved')
+    can_manager_approved = fields.Boolean(string='Manger peut valider',compute='_compute_can_manager_approved')
 
 
     @api.one
@@ -127,7 +127,7 @@ class SprogroupPurchaseRequest(models.Model):
     def _compute_can_reject(self):
         self.can_reject = (self.can_leader_approved or self.can_manager_approved)
 
-    can_reject = fields.Boolean(string='Can reject',compute='_compute_can_reject')
+    can_reject = fields.Boolean(string='il peut refusé',compute='_compute_can_reject')
 
 
 
@@ -140,20 +140,20 @@ class SprogroupPurchaseRequest(models.Model):
             else:
                 rec.is_editable = True
 
-    is_editable = fields.Boolean(string="Is editable",
+    is_editable = fields.Boolean(string="Modifiable",
                                  compute="_compute_is_editable",
                                  readonly=True)
 
     @api.model
     def create(self, vals):
-        request = super(SprogroupPurchaseRequest, self).create(vals)
+        request = super(buildit, self).create(vals)
         if vals.get('assigned_to'):
             request.message_subscribe_users(user_ids=[request.assigned_to.id])
         return request
 
     @api.multi
     def write(self, vals):
-        res = super(SprogroupPurchaseRequest, self).write(vals)
+        res = super(buildit, self).write(vals)
         for request in self:
             if vals.get('assigned_to'):
                 self.message_subscribe_users(user_ids=[request.assigned_to.id])
@@ -257,13 +257,13 @@ class SprogroupPurchaseRequest(models.Model):
                 'default_order_line': order_line,
                 'default_state': 'draft',
                 'default_picking_type_id':types.id,
-
+                'default_project_id':project_id.id,
             }
         }
-class SprogroupPurchaseRequestLine(models.Model):
+class builditLine(models.Model):
 
-    _name = "sprogroup.purchase.request.line"
-    _description = "Sprogroup Purchase Request Line"
+    _name = "build.it.line"
+    _description = "Build it Purchase Request Line"
     _inherit = ['mail.thread']
 
     @api.multi
@@ -289,7 +289,7 @@ class SprogroupPurchaseRequestLine(models.Model):
     product_qty = fields.Float('Quantity', track_visibility='onchange',
                                digits=dp.get_precision(
                                    'Product Unit of Measure'))
-    request_id = fields.Many2one('sprogroup.purchase.request',
+    request_id = fields.Many2one('build.it',
                                  'Purchase Request',
                                  ondelete='cascade', readonly=True)
     company_id = fields.Many2one('res.company',
@@ -365,7 +365,7 @@ class SprogroupPurchaseRequestLine(models.Model):
                                  readonly=True)
     @api.multi
     def write(self, vals):
-        res = super(SprogroupPurchaseRequestLine, self).write(vals)
+        res = super(builditLine, self).write(vals)
         if vals.get('cancelled'):
             requests = self.mapped('request_id')
             requests.check_auto_reject()

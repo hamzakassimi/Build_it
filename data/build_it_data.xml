@@ -2,8 +2,8 @@
 <odoo>
     <data>
          <record id="seq_build_it" model="ir.sequence">
-            <field name="name">Sprogroup Purchase Request</field>
-            <field name="code">sprogroup.purchase.request</field>
+            <field name="name">Build it Purchase Request</field>
+            <field name="code">build.it</field>
             <field name="prefix">PR-</field>
             <field name="padding">5</field>
         </record>

@@ -14,6 +14,6 @@ class PurchaseOrder(models.Model):
     # ------------------------------------------------------------------------
 
     project_id = fields.Many2one(
-        string='Project',
+        string='Projet',
         comodel_name='project.project',
 )

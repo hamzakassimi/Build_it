@@ -9,8 +9,8 @@
     'description': """
 Use Purchase Request module for requesting product.
     """,
-    'summary': 'Construction site management',
-    'website': 'https://www.build-it.com',
+    'summary': 'Manage construction sites',
+    'website': 'https://www.build-it.co',
     'images': ['static/description/icon.jpg'],
     'depends': ['mail'],
     'data': [

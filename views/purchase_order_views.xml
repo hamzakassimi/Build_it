@@ -8,9 +8,9 @@
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
                 <!-- SO Form View -->
-                <field name="date_order" postion="after">
+                <xpath expr="//group/group/field[@name='partner_id']" position="after">
                     <field name="project_id"/>
-                </field>
+                </xpath> 
             </field>
           </record>
     </data>
